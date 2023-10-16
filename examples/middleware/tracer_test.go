@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fiorix/go-diameter/v4/diam"
-	"github.com/fiorix/go-diameter/v4/diam/avp"
-	"github.com/fiorix/go-diameter/v4/diam/datatype"
-	"github.com/fiorix/go-diameter/v4/diam/diamtest"
+	"github.com/georgeyanev/go-diameter/diam"
+	"github.com/georgeyanev/go-diameter/diam/avp"
+	"github.com/georgeyanev/go-diameter/diam/datatype"
+	"github.com/georgeyanev/go-diameter/diam/diamtest"
 	"github.com/opentracing/opentracing-go"
 )
 
