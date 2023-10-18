@@ -602,6 +602,22 @@ func (srv *Server) ListenAndServe() error {
 	return srv.Serve(l)
 }
 
+func (srv *Server) ListenAndServeExt(closing <-chan struct{}) error {
+	network := srv.Network
+	if len(network) == 0 {
+		network = "tcp"
+	}
+	addr := srv.Addr
+	if len(addr) == 0 {
+		addr = ":3868"
+	}
+	l, e := MultistreamListen(network, addr)
+	if e != nil {
+		return e
+	}
+	return srv.ServeExt(closing, l)
+}
+
 // Serve accepts incoming connections on the Listener l, creating a
 // new service goroutine for each.  The service goroutines read requests and
 // then call srv.Handler to reply to them.
@@ -644,6 +660,62 @@ func (srv *Server) Serve(l net.Listener) error {
 	}
 }
 
+// ServeExt enhanced version of Serve accepting a channel indicating local closing and initializing
+// close notifier early
+func (srv *Server) ServeExt(closing <-chan struct{}, l net.Listener) error {
+	defer l.Close()
+	var tempDelay time.Duration // how long to sleep on accept failure
+	select {
+	case <-closing:
+		return fmt.Errorf("already closing")
+	default:
+	}
+	for {
+		rw, e := l.Accept()
+		if e != nil {
+			if ne, ok := e.(net.Error); ok && ne.Temporary() {
+				if tempDelay == 0 {
+					tempDelay = 5 * time.Millisecond
+				} else {
+					tempDelay *= 2
+				}
+				if max := 1 * time.Second; tempDelay > max {
+					tempDelay = max
+				}
+				log.Printf("diam: accept error: %v; retrying in %v", e, tempDelay)
+				time.Sleep(tempDelay)
+				continue
+			}
+			network := "<nil>"
+			address := network
+			addr := l.Addr()
+			if addr != nil {
+				network = addr.Network()
+				address = addr.String()
+			}
+			log.Printf("diam: accept error: %v for %s %s", e, network, address)
+			return e
+		}
+		// exit if closing, // if accept is blocking we have to issue a dummy dial to unblock it
+		select {
+		case <-closing:
+			rw.Close()
+			return nil
+		default:
+		}
+		tempDelay = 0
+		if c, err := srv.newConn(rw); err != nil {
+			log.Printf("srv.newConn error: %v", err)
+			continue
+		} else {
+			// initialize close notifier as soon as possible since closing without traffic will not trigger the
+			// pipe based notifier
+			c.closeNotify()
+			go c.serve()
+		}
+	}
+}
+
 // ListenAndServeNetwork listens on the network & addr
 // and then calls Serve with handler to handle requests
 // on incoming connections.
@@ -654,6 +726,11 @@ func (srv *Server) Serve(l net.Listener) error {
 func ListenAndServeNetwork(network, addr string, handler Handler, dp *dict.Parser) error {
 	server := &Server{Network: network, Addr: addr, Handler: handler, Dict: dp}
 	return server.ListenAndServe()
+}
+
+func ListenAndServeNetworkExt(closing <-chan struct{}, network, addr string, handler Handler, dp *dict.Parser) error {
+	server := &Server{Network: network, Addr: addr, Handler: handler, Dict: dp}
+	return server.ListenAndServeExt(closing)
 }
 
 // ListenAndServe listens on the TCP network address addr
