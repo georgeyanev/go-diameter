@@ -86,6 +86,11 @@ func dial(srv *Server, timeout time.Duration) (Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// initialize close notifier as soon as possible since closing without traffic will not trigger the
+	// pipe based notifier
+	c.closeNotify()
+
 	go c.serve()
 	return c.writer, nil
 }
