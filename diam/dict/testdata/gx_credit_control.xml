@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <diameter>
 
-    <application id="16777238" type="auth" name="Gx Charging Control">
+    <application id="16777238" type="auth" name="TGPP Gx">
         <!-- Diameter Gx Credit Control Application -->
         <!-- 3GPP 29.212 -->
 

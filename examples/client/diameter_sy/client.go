@@ -182,7 +182,7 @@ func sendSLR(c diam.Conn, cfg *sm.Settings) error {
 	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, cfg.OriginRealm)
 	m.NewAVP(avp.DestinationRealm, avp.Mbit, 0, meta.OriginRealm)
 	m.NewAVP(avp.DestinationHost, avp.Mbit, 0, meta.OriginHost)
-	m.NewAVP(avp.SLRequestType, avp.Mbit, 0, datatype.UTF8String("0"))
+	m.NewAVP(2904, avp.Mbit, 0, datatype.UTF8String("0")) // Spending-Limit-Request
 	log.Printf("Sending SLR to %s\n%s", c.RemoteAddr(), m)
 	_, err := m.WriteTo(c)
 	return err
