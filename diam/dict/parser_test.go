@@ -10,12 +10,13 @@ import (
 )
 
 var testDicts = []string{
-	"./testdata/base.xml",
-	"./testdata/credit_control.xml",
-	"./testdata/network_access_server.xml",
-	"./testdata/tgpp_ro_rf.xml",
-	"./testdata/tgpp_s6a.xml",
-	"./testdata/tgpp_swx.xml"}
+	"./xml/base.xml",
+	"./xml/credit_control.xml",
+	"./xml/network_access_server.xml",
+	"./xml/tgpp_ro_rf.xml",
+	"./xml/tgpp_rx.xml",
+	"./xml/tgpp_s6a.xml",
+	"./xml/tgpp_swx.xml"}
 
 func TestNewParser(t *testing.T) {
 	for _, dict := range testDicts {
