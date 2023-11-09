@@ -255,27 +255,28 @@ func (cli *Client) makeCER(hostIPAddresses []datatype.Address) *diam.Message {
 		stateid := datatype.Unsigned32(cli.Handler.cfg.OriginStateID)
 		m.NewAVP(avp.OriginStateID, avp.Mbit, 0, stateid)
 	}
-	if cli.SupportedVendorID != nil {
+
+	if cli.SupportedVendorID == nil && cli.AuthApplicationID == nil && // add all supported app avps from client's dict
+		cli.AcctApplicationID == nil && cli.VendorSpecificApplicationID == nil {
+
+		addSupportedAppsToCerCea(cli.Handler, m)
+
+	} else { // add app avps as defined in sm.client struct
 		for _, a := range cli.SupportedVendorID {
 			m.AddAVP(a)
 		}
-	}
-	if cli.AuthApplicationID != nil {
 		for _, a := range cli.AuthApplicationID {
 			m.AddAVP(a)
 		}
-	}
-	m.NewAVP(avp.InbandSecurityID, avp.Mbit, 0, datatype.Unsigned32(0))
-	if cli.AcctApplicationID != nil {
 		for _, a := range cli.AcctApplicationID {
 			m.AddAVP(a)
 		}
-	}
-	if cli.VendorSpecificApplicationID != nil {
 		for _, a := range cli.VendorSpecificApplicationID {
 			m.AddAVP(a)
 		}
 	}
+
+	//	m.NewAVP(avp.InbandSecurityID, avp.Mbit, 0, datatype.Unsigned32(0))
 	if cli.Handler.cfg.FirmwareRevision != 0 {
 		m.NewAVP(avp.FirmwareRevision, 0, 0, cli.Handler.cfg.FirmwareRevision)
 	}
