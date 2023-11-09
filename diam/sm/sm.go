@@ -91,6 +91,10 @@ type StateMachine struct {
 
 // New creates and initializes a new StateMachine for clients or servers.
 func New(settings *Settings) *StateMachine {
+	return NewExt(settings, dict.Default)
+}
+
+func NewExt(settings *Settings, dict *dict.Parser) *StateMachine {
 	if len(settings.HostIPAddresses) == 0 && len(settings.HostIPAddress) > 0 {
 		settings.HostIPAddresses = []datatype.Address{settings.HostIPAddress}
 	}
@@ -98,7 +102,7 @@ func New(settings *Settings) *StateMachine {
 		cfg:           settings,
 		mux:           diam.NewServeMux(),
 		hsNotifyc:     make(chan diam.Conn),
-		supportedApps: PrepareSupportedApps(dict.Default),
+		supportedApps: PrepareSupportedApps(dict),
 	}
 	sm.mux.Handle("CER", handleCER(sm))
 	sm.mux.Handle("DWR", handshakeOK(handleDWR(sm)))
