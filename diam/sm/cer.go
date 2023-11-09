@@ -141,26 +141,7 @@ func successCEA(sm *StateMachine, c diam.Conn, m *diam.Message, cer *smparser.CE
 	if cer.OriginStateID != nil {
 		a.AddAVP(cer.OriginStateID)
 	}
-	for _, app := range sm.supportedApps {
-		var typ uint32
-		switch app.AppType {
-		case "auth":
-			typ = avp.AuthApplicationID
-		case "acct":
-			typ = avp.AcctApplicationID
-		}
-		if app.Vendor != 0 {
-			a.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor))
-			a.NewAVP(avp.VendorSpecificApplicationID, avp.Mbit, 0, &diam.GroupedAVP{
-				AVP: []*diam.AVP{
-					diam.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor)),
-					diam.NewAVP(typ, avp.Mbit, 0, datatype.Unsigned32(app.ID)),
-				},
-			})
-		} else {
-			a.NewAVP(typ, avp.Mbit, 0, datatype.Unsigned32(app.ID))
-		}
-	}
+	addSupportedAppsToCerCea(sm, a)
 	if sm.cfg.FirmwareRevision != 0 {
 		a.NewAVP(avp.FirmwareRevision, 0, 0, sm.cfg.FirmwareRevision)
 	}

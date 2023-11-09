@@ -6,6 +6,7 @@ package sm
 
 import (
 	"fmt"
+	"github.com/georgeyanev/go-diameter/diam/avp"
 
 	"github.com/georgeyanev/go-diameter/diam"
 	"github.com/georgeyanev/go-diameter/diam/datatype"
@@ -177,5 +178,33 @@ type handshakeOK diam.HandlerFunc
 func (f handshakeOK) ServeDIAM(c diam.Conn, m *diam.Message) {
 	if _, ok := smpeer.FromContext(c.Context()); ok {
 		f(c, m)
+	}
+}
+
+// Add supported diameter applications to CER/CEA message preventing duplication of SupportedVendorId avps
+func addSupportedAppsToCerCea(sm *StateMachine, m *diam.Message) {
+	vendorIdSet := make(map[uint32]bool)
+	for _, app := range sm.supportedApps {
+		var typ uint32
+		switch app.AppType {
+		case "auth":
+			typ = avp.AuthApplicationID
+		case "acct":
+			typ = avp.AcctApplicationID
+		}
+		if app.Vendor != 0 {
+			if !vendorIdSet[app.Vendor] { // prevent duplicated SupportedVendorId avps
+				vendorIdSet[app.Vendor] = true
+				m.NewAVP(avp.SupportedVendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor))
+			}
+			m.NewAVP(avp.VendorSpecificApplicationID, avp.Mbit, 0, &diam.GroupedAVP{
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.VendorID, avp.Mbit, 0, datatype.Unsigned32(app.Vendor)),
+					diam.NewAVP(typ, avp.Mbit, 0, datatype.Unsigned32(app.ID)),
+				},
+			})
+		} else {
+			m.NewAVP(typ, avp.Mbit, 0, datatype.Unsigned32(app.ID))
+		}
 	}
 }
