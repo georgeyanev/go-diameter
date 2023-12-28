@@ -75,6 +75,7 @@ var (
 	baseCERIdx = diam.CommandIndex{AppID: 0, Code: diam.CapabilitiesExchange, Request: true}
 	baseCEAIdx = diam.CommandIndex{AppID: 0, Code: diam.CapabilitiesExchange, Request: false}
 	baseDWRIdx = diam.CommandIndex{AppID: 0, Code: diam.DeviceWatchdog, Request: true}
+	baseDWAIdx = diam.CommandIndex{AppID: 0, Code: diam.DeviceWatchdog, Request: false}
 )
 
 // StateMachine is a specialized type of diam.ServeMux that handles

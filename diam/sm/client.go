@@ -211,11 +211,13 @@ func (cli *Client) handshake(c diam.Conn) (diam.Conn, error) {
 	cli.Handler.mux.HandleFunc("CER", cerClientHandler)
 	// Handle CEA and DWA.
 	errc := make(chan error)
+	cli.Handler.mux.HandleIdx(baseCEAIdx, handleCEA(cli.Handler, errc))
 	cli.Handler.mux.Handle("CEA", handleCEA(cli.Handler, errc))
 
 	var dwac chan struct{}
 	if cli.EnableWatchdog {
 		dwac = make(chan struct{})
+		cli.Handler.mux.HandleIdx(baseDWAIdx, handshakeOK(handleDWA(cli.Handler, dwac)))
 		cli.Handler.mux.Handle("DWA", handshakeOK(handleDWA(cli.Handler, dwac)))
 	}
 	for i := 0; i < (int(cli.MaxRetransmits) + 1); i++ {
