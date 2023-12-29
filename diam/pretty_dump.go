@@ -3,14 +3,13 @@ package diam
 import (
 	"bytes"
 	"fmt"
+	"github.com/georgeyanev/go-diameter/diam/avp"
+	"github.com/georgeyanev/go-diameter/diam/datatype"
+	"github.com/georgeyanev/go-diameter/diam/dict"
 	"io"
 	"net"
 	"strings"
 	"time"
-
-	"github.com/fiorix/go-diameter/v4/diam/avp"
-	"github.com/fiorix/go-diameter/v4/diam/datatype"
-	"github.com/fiorix/go-diameter/v4/diam/dict"
 )
 
 func (m *Message) PrettyDump() string {
@@ -94,14 +93,14 @@ func appIdToString(appId int) string {
 		return "Charging-Control"
 	//case TGPP_APP_ID:
 	//	return "TGPP_APP_ID"
-	case GX_CHARGING_CONTROL_APP_ID:
+	case TGPP_GX_APP_ID:
 		return "Gx"
 	case TGPP_S6A_APP_ID:
 		return "S6A"
 	case TGPP_SWX_APP_ID:
 		return "SWX"
-	case DIAMETER_SY_APP_ID:
-		return "Sy"
+	//case DIAMETER_SY_APP_ID:
+	//	return "Sy"
 	default:
 		return "Unknown"
 	}
