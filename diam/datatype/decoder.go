@@ -24,10 +24,12 @@ var Decoder = map[TypeID]DecoderFunc{
 	Integer32Type:        DecodeInteger32,
 	Integer64Type:        DecodeInteger64,
 	OctetStringType:      DecodeOctetString,
+	QoSFilterRuleType:    DecodeQoSFilterRule,
 	TimeType:             DecodeTime,
 	UTF8StringType:       DecodeUTF8String,
 	Unsigned32Type:       DecodeUnsigned32,
 	Unsigned64Type:       DecodeUnsigned64,
+	IPv6Type:             DecodeIPv6,
 }
 
 // Decode decodes a specific AVP data type from byte array to a DataType.
