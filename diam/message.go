@@ -237,6 +237,19 @@ func (m *Message) InsertAVP(a *AVP) {
 	m.Header.MessageLength += uint32(a.Len())
 }
 
+// InsertAVPAtIndex inserts the AVP to the Message at the specified index. It is not
+// safe for concurrent calls.
+func (m *Message) InsertAVPAtIndex(a *AVP, index int) {
+	if index >= len(m.AVP) {
+		m.AddAVP(a)
+	} else if index <= 0 {
+		m.InsertAVP(a)
+	} else {
+		m.AVP = append(m.AVP[:index], append([]*AVP{a}, m.AVP[index:]...)...)
+		m.Header.MessageLength += uint32(a.Len())
+	}
+}
+
 var writerBufferPool sync.Pool
 
 func newWriterBuffer(min int) *bytes.Buffer {
