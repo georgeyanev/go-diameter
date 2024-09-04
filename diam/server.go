@@ -208,8 +208,11 @@ func (c *conn) serve() {
 			}
 			break
 		}
-		// Handle messages in this goroutine.
-		serverHandler{c.server}.ServeDIAM(c.writer, m)
+		// Handle messages in a new goroutine.
+		// Unlike HTTP 1.1, in Diameter we can have multiple independent messages on a single connection/association
+		// In HTTP 1.1, you can not send new messages before receiving the response to the first one (for a given tcp connection).
+		// In Diameter, you can. So we should process new messages independently.
+		go serverHandler{c.server}.ServeDIAM(c.writer, m)
 	}
 }
 
